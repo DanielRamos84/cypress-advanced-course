@@ -1,12 +1,26 @@
 describe('Hacker Stories', () => {
   beforeEach(() => {
-    cy.visit('/')
+    // cy.intercept(`api/v1/search?query=React&page=0`)
+    //   .as('getStories');
 
-    cy.assertLoadingIsShownAndHidden()
-    cy.contains('More').should('be.visible')
+    cy.intercept({
+      pathname: '**/search',
+      query: {
+        query: 'React',
+        page: '0'
+        } 
+    }).as('getStories');
+
+    cy.visit('/');
+
+    cy.wait('@getStories')
+      .then(res=>{
+        expect(res.response.statusCode).equal(200)
+      });
   })
 
   it('shows the footer', () => {
+
     cy.get('footer')
       .should('be.visible')
       .and('contain', 'Icons made by Freepik from www.flaticon.com')
