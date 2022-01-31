@@ -1,7 +1,5 @@
 # Testing Automation with Cypress - Advanced
 
-👋 Welcome!
-
 I'm pleased to have you here. I'm sure you're gonna love this course. ❤️
 
 ## What you will learn
