@@ -40,3 +40,5 @@ However, we can also use the following passing the object properties
     page: '#'
   }
 }).as('someAlias');`
+
+# Lesson 2
