@@ -32,25 +32,26 @@ describe('Hacker Stories', () => {
     // and so, how can I assert on the data?
     // This is why this test is being skipped.
     // TODO: Find a way to test it out.
-    it.skip('shows the right data for all rendered stories', () => {})
+    it('shows the right data for all rendered stories', () => {})
 
     it('shows 20 stories, then the next 20 after clicking "More"', () => {
-      cy.get('.item').should('have.length', 20)
 
-      cy.contains('More').click()
+      cy.get('.item').should('have.length', 20);
+
+      cy.contains('button', 'More').click();
 
       cy.assertLoadingIsShownAndHidden()
 
       cy.get('.item').should('have.length', 40)
     })
 
-    it('shows only nineteen stories after dimissing the first story', () => {
+    it('shows only nineteen stories after dismissing the first story', () => {
       cy.get('.button-small')
         .first()
         .click()
 
       cy.get('.item').should('have.length', 19)
-    })
+    });
 
     // Since the API is external,
     // I can't control what it will provide to the frontend,
