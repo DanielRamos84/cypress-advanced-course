@@ -15,8 +15,10 @@ describe('Hacker Stories', () => {
 
     cy.wait('@getStories')
       .then(res=>{
-        expect(res.response.statusCode).equal(200)
+        expect(res.response.statusCode).eq(200)
       });
+
+      cy.get('#search').clear();
   })
 
   it('shows the footer', () => {
@@ -36,14 +38,44 @@ describe('Hacker Stories', () => {
 
     it('shows 20 stories, then the next 20 after clicking "More"', () => {
 
+      // cy.intercept(`api/v1/search?query=React&page=1`).as('page1');
+
+      cy.intercept({
+        pathname: '**/search',
+        query: {
+          query: 'React',
+          page: '1'
+        }
+      }).as('page1');
+
       cy.get('.item').should('have.length', 20);
 
       cy.contains('button', 'More').click();
 
-      cy.assertLoadingIsShownAndHidden()
+      cy.wait('@page1').then(res=>{
+        expect(res.response.statusCode).eq(200);
+      });
 
       cy.get('.item').should('have.length', 40)
     })
+
+    it('Types word Automation and hits ENTER', () => {
+      // cy.intercept(`api/v1/search?query=Automation&page=0`).as('searchAutomation');
+
+      cy.intercept({
+        pathname: '**/search',
+        query: {
+          query: 'Automation',
+          page: '0'
+          }
+      }).as('searchAutomation')
+
+      cy.get('#search').type('Automation{enter}');
+
+      cy.wait('@searchAutomation').then(res => {
+        expect(res.response.statusCode).eq(200);
+      });
+    });
 
     it('shows only nineteen stories after dismissing the first story', () => {
       cy.get('.button-small')
