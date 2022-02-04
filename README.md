@@ -27,7 +27,7 @@ Now after we click the button More we wait for that response using an alias and 
 ## Second extra credit Types word Automation and hits ENTER
 We intercept `api/v1/search?query=Automation&page=0`).as('searchAutomation');` but notice it fails
 
-![img](/cypress-advanced-course/images/image_01.png)
+https://github.com/DanielRamos84/cypress-advanced-course/blob/Lesson-2/images/image_01.png
 
 This is because our application reloads every time we execute an it block in our spec file and default behavior of the application is to start the search with React and appends our text to the end of this.
 
