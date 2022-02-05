@@ -77,6 +77,26 @@ describe('Hacker Stories', () => {
       });
     });
 
+    it.only('Types and clicks the submit button', () => {
+      // cy.intercept(`api/v1/search?query=Testing&page=0`).as('submit');
+
+      cy.intercept({
+        pathname: '**/search',
+        query: {
+          query: 'Testing',
+          page: '0'
+        }
+      }).as('submit');
+      
+      cy.get('#search').type('Testing');
+      
+      cy.contains('button', 'Submit').click();
+
+      cy.wait('@submit').then(res=>{
+        expect(res.response.statusCode).eq(200);
+      });
+    });
+
     it('shows only nineteen stories after dismissing the first story', () => {
       cy.get('.button-small')
         .first()
