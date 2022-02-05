@@ -80,21 +80,37 @@ describe('Hacker Stories', () => {
     it.only('Types and clicks the submit button', () => {
       // cy.intercept(`api/v1/search?query=Testing&page=0`).as('submit');
 
+      const previousWord= 'React'
+      const currentWord= 'testing'
+
       cy.intercept({
         pathname: '**/search',
         query: {
-          query: 'Testing',
+          query: currentWord,
           page: '0'
         }
       }).as('submit');
       
-      cy.get('#search').type('Testing');
+      cy.get('#search').type(currentWord);
       
       cy.contains('button', 'Submit').click();
 
       cy.wait('@submit').then(res=>{
         expect(res.response.statusCode).eq(200);
       });
+
+      cy.get('div.item').as('displayHitsPage1');
+
+      cy.get('@displayHitsPage1').each((result, index) => {
+        const resultText= result.text();
+        const resultTextCase= resultText.toLowerCase();
+
+        cy.log(`***Line #${index+1} ${result.text()}***`);
+        cy.wrap(resultTextCase, {log:false}).should('contain', currentWord.toLowerCase());
+      });
+
+      cy.get('.last-searches button').contains(previousWord);
+
     });
 
     it('shows only nineteen stories after dismissing the first story', () => {
