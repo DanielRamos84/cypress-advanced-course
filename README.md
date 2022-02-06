@@ -76,3 +76,33 @@
   });`
 
 ![img](./images/Image_04.png)
+
+## Fourth extra credit
+### Types and searches via the last searched term
+- Test that it searches via the last searched term
+- As a continuation from the previous test, once we search for a word a button shows up with the previous entry that by default reads React, so we want to make the assertion that button shows up and after we click on it the list rendered in the DOM includes articles with the word React.
+- To accomplish this we intercept the request that takes place after clicking the button with the word React and follow with our assertions.
+
+  `cy.intercept({
+    pathname: '**/search',
+      query: {
+        query: previousWord,
+        page: '0'
+      }
+  }).as('previousWordResult');`
+
+## Fifth extra credit
+### Shows a max of 5 buttons for the last searched terms
+- For this test we type 5 random words one at a time into the input field using faker, remember in our beforeEach hook we're already clearing the input field so we make sure we are not appending words that we're searching for. 
+
+- Using the same approach we have to intercept the call to ensure our test is flake free, previously we'd hardcode the word into a variable and include that in our query parameters.  However, now its a random word so we can simply specify in query the use of wildcards.
+
+  `cy.intercept({
+              pathname: '**/search',
+              query: {
+                query: '**',
+                page: '0'
+                }
+              }).as('randomWordResult');`
+
+- We alias our request as randomWordResult and wait for the response to happen each time we search for a word.

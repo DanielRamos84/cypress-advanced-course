@@ -22,7 +22,6 @@ describe('Hacker Stories', () => {
   })
 
   it('shows the footer', () => {
-
     cy.get('footer')
       .should('be.visible')
       .and('contain', 'Icons made by Freepik from www.flaticon.com')
@@ -59,60 +58,6 @@ describe('Hacker Stories', () => {
       cy.get('.item').should('have.length', 40)
     })
 
-    it('Types word Automation and hits ENTER', () => {
-      // cy.intercept(`api/v1/search?query=Automation&page=0`).as('searchAutomation');
-
-      cy.intercept({
-        pathname: '**/search',
-        query: {
-          query: 'Automation',
-          page: '0'
-          }
-      }).as('searchAutomation')
-
-      cy.get('#search').type('Automation{enter}');
-
-      cy.wait('@searchAutomation').then(res => {
-        expect(res.response.statusCode).eq(200);
-      });
-    });
-
-    it.only('Types and clicks the submit button', () => {
-      // cy.intercept(`api/v1/search?query=Testing&page=0`).as('submit');
-
-      const previousWord= 'React'
-      const currentWord= 'testing'
-
-      cy.intercept({
-        pathname: '**/search',
-        query: {
-          query: currentWord,
-          page: '0'
-        }
-      }).as('submit');
-      
-      cy.get('#search').type(currentWord);
-      
-      cy.contains('button', 'Submit').click();
-
-      cy.wait('@submit').then(res=>{
-        expect(res.response.statusCode).eq(200);
-      });
-
-      cy.get('div.item').as('displayHitsPage1');
-
-      cy.get('@displayHitsPage1').each((result, index) => {
-        const resultText= result.text();
-        const resultTextCase= resultText.toLowerCase();
-
-        cy.log(`***Line #${index+1} ${result.text()}***`);
-        cy.wrap(resultTextCase, {log:false}).should('contain', currentWord.toLowerCase());
-      });
-
-      cy.get('.last-searches button').contains(previousWord);
-
-    });
-
     it('shows only nineteen stories after dismissing the first story', () => {
       cy.get('.button-small')
         .first()
@@ -147,79 +92,145 @@ describe('Hacker Stories', () => {
   })
 
   context('Search', () => {
-    const initialTerm = 'React'
-    const newTerm = 'Cypress'
+    const previousWord= 'React'
+    const currentWord= 'testing'
 
     beforeEach(() => {
-      cy.get('#search')
-        .clear()
-    })
+   // // cy.intercept(`api/v1/search?query=Testing&page=0`).as('submit');
+    
+      cy.intercept({
+        pathname: '**/search',
+        query: {
+          query: currentWord,
+          page: '0'
+        }
+      }).as('searchCurrentWord');
+    });
 
-    it('types and hits ENTER', () => {
-      cy.get('#search')
-        .type(`${newTerm}{enter}`)
+    it('Types word testing and hits ENTER', () => {
+      // cy.intercept(`api/v1/search?query=Automation&page=0`).as('searchCurrentWord');
 
-      cy.assertLoadingIsShownAndHidden()
+      cy.intercept({
+        pathname: '**/search',
+        query: {
+          query: currentWord,
+          page: '0'
+          }
+      }).as('searchCurrentWord')
 
-      cy.get('.item').should('have.length', 20)
-      cy.get('.item')
-        .first()
-        .should('contain', newTerm)
-      cy.get(`button:contains(${initialTerm})`)
-        .should('be.visible')
-    })
+      cy.get('#search').type(`${currentWord}{enter}`);
 
-    it('types and clicks the submit button', () => {
-      cy.get('#search')
-        .type(newTerm)
-      cy.contains('Submit')
-        .click()
+      cy.wait('@searchCurrentWord').then(res => {
+        expect(res.response.statusCode).eq(200);
+      });
+    });
 
-      cy.assertLoadingIsShownAndHidden()
+    it('Types and clicks the submit button', () => {
 
-      cy.get('.item').should('have.length', 20)
-      cy.get('.item')
-        .first()
-        .should('contain', newTerm)
-      cy.get(`button:contains(${initialTerm})`)
-        .should('be.visible')
-    })
+      cy.get('#search').type(currentWord);
+      
+      cy.contains('button', 'Submit').click();
+
+      cy.wait('@searchCurrentWord').then(res=>{
+        expect(res.response.statusCode).eq(200);
+      });
+
+      cy.get('div.item').as('displayHitsPage1');
+
+      cy.get('@displayHitsPage1').each((result, index) => {
+        const resultText= result.text();
+        const resultTextCase= resultText.toLowerCase();
+
+        cy.log(`***Line #${index+1} ${result.text()}***`);
+        cy.wrap(resultTextCase, {log:false}).should('contain', currentWord.toLowerCase());
+      });
+
+      cy.get('.last-searches button').contains(previousWord);
+    });
 
     context('Last searches', () => {
       it('searches via the last searched term', () => {
+
+      cy.intercept({
+        pathname: '**/search',
+        query: {
+          query: previousWord,
+          page: '0'
+          }
+        }).as('previousWordResult');
+
         cy.get('#search')
-          .type(`${newTerm}{enter}`)
+          .type(`${currentWord}{enter}`)
 
-        cy.assertLoadingIsShownAndHidden()
+        cy.wait('@searchCurrentWord').then(res=>{
+          expect(res.response.statusCode).eq(200);
+        });
 
-        cy.get(`button:contains(${initialTerm})`)
-          .should('be.visible')
-          .click()
+        cy.get('.last-searches button').contains(previousWord).should('be.visible').click();
 
-        cy.assertLoadingIsShownAndHidden()
+        cy.wait('@previousWordResult').then(res=>{
+          expect(res.response.statusCode).eq(200);
+        });
 
-        cy.get('.item').should('have.length', 20)
-        cy.get('.item')
-          .first()
-          .should('contain', initialTerm)
-        cy.get(`button:contains(${newTerm})`)
-          .should('be.visible')
+        cy.get('div.item').as('displayHitsPage1');
+
+        cy.get('@displayHitsPage1').each((result, index) => {
+          const resultText= result.text();
+          const resultTextCase= resultText.toLowerCase();
+
+          cy.log(`***Line #${index+1} ${result.text()}***`);
+          cy.wrap(resultTextCase, {log:false}).should('contain', previousWord.toLowerCase());
+        });
+      });
+
+        it('shows a max of 5 buttons for the last searched terms', () => {
+          const faker = require('faker')
+  
+          cy.intercept({
+            pathname: '**/search',
+            query: {
+              query: '**',
+              page: '0'
+              }
+            }).as('randomWordResult');
+  
+          Cypress._.times(6, () => {
+            cy.get('#search')
+              .clear()
+              .type(`${faker.random.word()}{enter}`)
+  
+            cy.wait('@randomWordResult').then(res=>{
+              expect(res.response.statusCode).eq(200);
+            });
+          });
+  
+          cy.get('.last-searches button')
+            .should('have.length', 5)
+        });
       })
+      // it.only('shows a max of 5 buttons for the last searched terms', () => {
+      //   const faker = require('faker')
 
-      it('shows a max of 5 buttons for the last searched terms', () => {
-        const faker = require('faker')
+      //   cy.intercept({
+      //     pathname: '**/search',
+      //     query: {
+      //       query: '**',
+      //       page: '0'
+      //       }
+      //     }).as('randomWordResult');
 
-        Cypress._.times(6, () => {
-          cy.get('#search')
-            .clear()
-            .type(`${faker.random.word()}{enter}`)
-        })
+      //   Cypress._.times(6, () => {
+      //     cy.get('#search')
+      //       .clear()
+      //       .type(`${faker.random.word()}{enter}`)
 
-        cy.assertLoadingIsShownAndHidden()
+      //     cy.wait('@randomWordResult').then(res=>{
+      //       expect(res.response.statusCode).eq(200);
+      //     });
+      //   });
 
-        cy.get('.last-searches button')
-          .should('have.length', 5)
-      })
-    })
-  })
-})
+      //   cy.get('.last-searches button')
+      //     .should('have.length', 5)
+      // });
+    });
+  });
