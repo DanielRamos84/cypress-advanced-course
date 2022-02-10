@@ -106,3 +106,10 @@
               }).as('randomWordResult');`
 
 - We alias our request as randomWordResult and wait for the response to happen each time we search for a word.
+
+A revision to 
+## Third extra credit
+### Types and clicks the submit button
+- I didn't need to make that conversion to lowercase at all, if I want to ignore case sensitivity we can simply pass the matchCase option as false to our contains command.  In the test it would look as follows:
+
+  `cy.wrap(result, {log:false}).contains(currentWord, {matchCase:false})`

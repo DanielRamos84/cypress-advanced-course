@@ -84,16 +84,10 @@ describe('Hacker Stories', () => {
     // Hrm, how would I simulate such errors?
     // Since I still don't know, the tests are being skipped.
     // TODO: Find a way to test them out.
-    context.skip('Errors', () => {
-      it('shows "Something went wrong ..." in case of a server error', () => {})
-
-      it('shows "Something went wrong ..." in case of a network error', () => {})
-    })
-  })
 
   context('Search', () => {
     const previousWord= 'React'
-    const currentWord= 'testing'
+    const currentWord= 'Testing'
 
     beforeEach(() => {
    // // cy.intercept(`api/v1/search?query=Testing&page=0`).as('submit');
@@ -125,7 +119,7 @@ describe('Hacker Stories', () => {
       });
     });
 
-    it('Types and clicks the submit button', () => {
+    it.only('Types and clicks the submit button', () => {
 
       cy.get('#search').type(currentWord);
       
@@ -138,11 +132,9 @@ describe('Hacker Stories', () => {
       cy.get('div.item').as('displayHitsPage1');
 
       cy.get('@displayHitsPage1').each((result, index) => {
-        const resultText= result.text();
-        const resultTextCase= resultText.toLowerCase();
-
         cy.log(`***Line #${index+1} ${result.text()}***`);
-        cy.wrap(resultTextCase, {log:false}).should('contain', currentWord.toLowerCase());
+
+        cy.wrap(result, {log:false}).contains(currentWord, {matchCase:false})
       });
 
       cy.get('.last-searches button').contains(previousWord);
@@ -234,3 +226,22 @@ describe('Hacker Stories', () => {
       // });
     });
   });
+});
+
+context('Errors', () => {
+  it('shows "Something went wrong ..." in case of a server error', () => {
+    cy.intercept(`**/search**`, {statusCode: 500})
+      .as('getServerFailure');
+
+    cy.visit('/');
+    cy.wait('@getServerFailure');
+  });
+
+  it('shows "Something went wrong ..." in case of a network error', () => {
+    cy.intercept(`**/search**`, {forceNetworkError: true})
+      .as('getNetworkError');
+
+    cy.visit('/')
+    cy.wait('@getNetworkError');
+  });
+});
