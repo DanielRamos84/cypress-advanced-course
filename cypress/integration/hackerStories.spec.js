@@ -4,10 +4,10 @@ const currentWord= 'Testing'
 describe('Hacker Stories', () => {
   context('Mocking the API', () => {
     beforeEach(() => {
-      cy.intercept(`api/v1/search?query=React&page=0`, {fixture: 'example'})
+      cy.intercept(`api/v1/search?query=React&page=0`, {fixture: 'stories'})
         .as('getStories');
 
-      cy.intercept(`api/v1/search?query=${currentWord}&page=0`, {fixture: 'example'})
+      cy.intercept(`api/v1/search?query=${currentWord}&page=0`, {fixture: 'stories'})
         .as('searchCurrentWord');
   
       cy.visit('/');
@@ -49,9 +49,36 @@ describe('Hacker Stories', () => {
       cy.get('.last-searches button')
         .should('have.length', 5)
     });
+
+    it('Shows the right data for all rendered stories', () => {
+      cy.wait('@getStories');
+      const stories= require ('../fixtures/stories.json');
+      
+      cy.get('.item:eq(0) span', {log:false})
+        .as('firstRowItem')
+      
+      cy.get('@firstRowItem').within(span => {
+        cy.wrap(span, {log:false}).eq(0, {log:false}).should('have.text', stories.hits[0].title).and('be.visible');
+        cy.wrap(span).contains('a', {log:false}).should('have.attr', 'href', stories.hits[0].url);
+        cy.wrap(span, {log:false}).eq(1, {log:false}).should('have.text', stories.hits[0].author).and('be.visible');
+        cy.wrap(span, {log:false}).eq(2, {log:false}).should('have.text', stories.hits[0].num_comments).and('be.visible');
+        cy.wrap(span, {log:false}).eq(3, {log:false}).should('have.text', stories.hits[0].points).and('be.visible');
+      });
+
+      cy.get('.item:eq(1) span', {log:false})
+        .as('secondRowItem')
+      
+      cy.get('@secondRowItem').within(span => {
+        cy.wrap(span, {log:false}).eq(0, {log:false}).should('have.text', stories.hits[1].title).and('be.visible');
+        cy.wrap(span).contains('a', {log:false}).should('have.attr', 'href', stories.hits[1].url);
+        cy.wrap(span, {log:false}).eq(1, {log:false}).should('have.text', stories.hits[1].author).and('be.visible');
+        cy.wrap(span, {log:false}).eq(2, {log:false}).should('have.text', stories.hits[1].num_comments).and('be.visible');
+        cy.wrap(span, {log:false}).eq(3, {log:false}).should('have.text', stories.hits[1].points).and('be.visible');
+      });
+    });
   });
   
-  context('Hitting the real API', () => {
+  context.skip('Hitting the real API', () => {
   beforeEach(() => {
     cy.intercept(`api/v1/search?query=React&page=0`)
       .as('getStories');
@@ -268,7 +295,7 @@ context('List of stories', () => {
   });
 });
 
-context('Errors', () => {
+context.skip('Errors', () => {
   it('shows "Something went wrong ..." in case of a server error', () => {
     cy.intercept(`**/search**`, {statusCode: 500})
       .as('getServerFailure');
