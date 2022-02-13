@@ -1,4 +1,6 @@
 {
   "baseUrl": "https://wlsf82-hacker-stories.web.app",
-  "pluginsFile": false
+  "pluginsFile": false,
+    "viewportWidth": 1080,
+    "viewportHeight": 1200
 }

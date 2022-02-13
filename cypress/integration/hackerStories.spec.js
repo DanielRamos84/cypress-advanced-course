@@ -1,7 +1,60 @@
+const previousWord= 'React'
+const currentWord= 'Testing'
+
 describe('Hacker Stories', () => {
+  context('Mocking the API', () => {
+    beforeEach(() => {
+      cy.intercept(`api/v1/search?query=React&page=0`, {fixture: 'example'})
+        .as('getStories');
+
+      cy.intercept(`api/v1/search?query=${currentWord}&page=0`, {fixture: 'example'})
+        .as('searchCurrentWord');
+  
+      cy.visit('/');
+    });
+    
+    it('shows the right amount of records and data for all rendered stories', () => {
+      cy.get('.item').should('have.length', 2);
+
+      cy.contains('button', 'More').click();
+    });
+
+    it('Types word testing and hits ENTER', () => {    
+      cy.get('#search').type(`${currentWord}{enter}`);
+    });
+
+    it('Shows one story less after dismissing the first one', () =>{
+      cy.get('.button-small:eq(0)')
+        .click();
+
+      cy.get('.item').should('have.length', 1);
+    });
+
+    it('shows a max of 5 buttons for the last searched terms', () => {
+      const faker = require('faker')
+
+      cy.intercept('**/search**', {fixture: 'empty'})
+        .as('randomWordResult');
+
+      Cypress._.times(6, () => {
+        cy.get('#search')
+          .clear()
+          .type(`${faker.random.word()}{enter}`)
+
+        cy.wait('@randomWordResult').then(res=>{
+          expect(res.response.statusCode).eq(200);
+        });
+      });
+
+      cy.get('.last-searches button')
+        .should('have.length', 5)
+    });
+  });
+  
+  context('Hitting the real API', () => {
   beforeEach(() => {
-    // cy.intercept(`api/v1/search?query=React&page=0`)
-    //   .as('getStories');
+    cy.intercept(`api/v1/search?query=React&page=0`)
+      .as('getStories');
 
     cy.intercept({
       pathname: '**/search',
@@ -27,7 +80,7 @@ describe('Hacker Stories', () => {
       .and('contain', 'Icons made by Freepik from www.flaticon.com')
   })
 
-  context('List of stories', () => {
+context('List of stories', () => {
     // Since the API is external,
     // I can't control what it will provide to the frontend,
     // and so, how can I assert on the data?
@@ -71,7 +124,7 @@ describe('Hacker Stories', () => {
     // and so, how can I test ordering?
     // This is why these tests are being skipped.
     // TODO: Find a way to test them out.
-    context.skip('Order by', () => {
+    context('Order by', () => {
       it('orders by title', () => {})
 
       it('orders by author', () => {})
@@ -86,19 +139,17 @@ describe('Hacker Stories', () => {
     // TODO: Find a way to test them out.
 
   context('Search', () => {
-    const previousWord= 'React'
-    const currentWord= 'Testing'
 
     beforeEach(() => {
-   // // cy.intercept(`api/v1/search?query=Testing&page=0`).as('submit');
-    
-      cy.intercept({
-        pathname: '**/search',
-        query: {
-          query: currentWord,
-          page: '0'
-        }
-      }).as('searchCurrentWord');
+    cy.intercept(`api/v1/search?query=Testing&page=0`).as('submit');
+      
+        cy.intercept({
+          pathname: '**/search',
+          query: {
+            query: currentWord,
+            page: '0'
+          }
+        }).as('searchCurrentWord');
     });
 
     it('Types word testing and hits ENTER', () => {
@@ -119,7 +170,7 @@ describe('Hacker Stories', () => {
       });
     });
 
-    it.only('Types and clicks the submit button', () => {
+    it('Types and clicks the submit button', () => {
 
       cy.get('#search').type(currentWord);
       
@@ -139,8 +190,21 @@ describe('Hacker Stories', () => {
 
       cy.get('.last-searches button').contains(previousWord);
     });
+  });
 
     context('Last searches', () => {
+      beforeEach(() => {
+        cy.intercept(`api/v1/search?query=Testing&page=0`).as('submit');
+         
+           cy.intercept({
+             pathname: '**/search',
+             query: {
+               query: currentWord,
+               page: '0'
+             }
+           }).as('searchCurrentWord');
+         });
+
       it('searches via the last searched term', () => {
 
       cy.intercept({
@@ -199,31 +263,7 @@ describe('Hacker Stories', () => {
           cy.get('.last-searches button')
             .should('have.length', 5)
         });
-      })
-      // it.only('shows a max of 5 buttons for the last searched terms', () => {
-      //   const faker = require('faker')
-
-      //   cy.intercept({
-      //     pathname: '**/search',
-      //     query: {
-      //       query: '**',
-      //       page: '0'
-      //       }
-      //     }).as('randomWordResult');
-
-      //   Cypress._.times(6, () => {
-      //     cy.get('#search')
-      //       .clear()
-      //       .type(`${faker.random.word()}{enter}`)
-
-      //     cy.wait('@randomWordResult').then(res=>{
-      //       expect(res.response.statusCode).eq(200);
-      //     });
-      //   });
-
-      //   cy.get('.last-searches button')
-      //     .should('have.length', 5)
-      // });
+      });
     });
   });
 });
