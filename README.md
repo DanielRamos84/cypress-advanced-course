@@ -52,3 +52,16 @@
       });
 
 - Use the same approach for the second row replacing the index from 0 to 1.  Notice we are using `{log:false}` in several commands, this is to minimize chatter in the command log.  Even if we're suppressing the log from grabbing certain elements, if the test was to fail on any of those Cypress will still log that information for us.  While it seems tedious to repeat this process it helps to tidy things up in the command log so we can focus on the information that matters.  In addition to asserting the text we also assert the url contained in the fixture file for each of the objects.
+
+## Check that we can sort our items list by title, header, comments or points
+- Being that we are implementing a second test that will look at the fixture file, it makes sense to move that file declaration above our beforeEach hook so we can access the information for any other tests that wall in our context ('List of stories').
+
+    context('List of stories', () =>{
+          const stories= require ('../fixtures/stories.json');
+
+          beforeEach(() => {
+            cy.wait('@getStories');
+            cy.visit('/');
+          });
+
+- All we have to do is click on each headers and assert the information is sorted as we expect comparing the text value to its respective property in `stories.hits[index]...`

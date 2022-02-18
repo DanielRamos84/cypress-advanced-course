@@ -2,7 +2,7 @@ const previousWord= 'React'
 const currentWord= 'Testing'
 
 describe('Hacker Stories', () => {
-  context('Mocking the API', () => {
+  context.only('Mocking the API', () => {
     beforeEach(() => {
       cy.intercept(`api/v1/search?query=React&page=0`, {fixture: 'stories'})
         .as('getStories');
@@ -50,35 +50,103 @@ describe('Hacker Stories', () => {
         .should('have.length', 5)
     });
 
-    it('Shows the right data for all rendered stories', () => {
-      cy.wait('@getStories');
+    context('List of stories', () =>{
       const stories= require ('../fixtures/stories.json');
-      
-      cy.get('.item:eq(0) span', {log:false})
-        .as('firstRowItem')
-      
-      cy.get('@firstRowItem').within(span => {
-        cy.wrap(span, {log:false}).eq(0, {log:false}).should('have.text', stories.hits[0].title).and('be.visible');
-        cy.wrap(span).contains('a', {log:false}).should('have.attr', 'href', stories.hits[0].url);
-        cy.wrap(span, {log:false}).eq(1, {log:false}).should('have.text', stories.hits[0].author).and('be.visible');
-        cy.wrap(span, {log:false}).eq(2, {log:false}).should('have.text', stories.hits[0].num_comments).and('be.visible');
-        cy.wrap(span, {log:false}).eq(3, {log:false}).should('have.text', stories.hits[0].points).and('be.visible');
+
+      beforeEach(() => {
+        cy.wait('@getStories');
+        cy.visit('/');
       });
 
-      cy.get('.item:eq(1) span', {log:false})
-        .as('secondRowItem')
-      
-      cy.get('@secondRowItem').within(span => {
-        cy.wrap(span, {log:false}).eq(0, {log:false}).should('have.text', stories.hits[1].title).and('be.visible');
-        cy.wrap(span).contains('a', {log:false}).should('have.attr', 'href', stories.hits[1].url);
-        cy.wrap(span, {log:false}).eq(1, {log:false}).should('have.text', stories.hits[1].author).and('be.visible');
-        cy.wrap(span, {log:false}).eq(2, {log:false}).should('have.text', stories.hits[1].num_comments).and('be.visible');
-        cy.wrap(span, {log:false}).eq(3, {log:false}).should('have.text', stories.hits[1].points).and('be.visible');
+      it('Shows the right data for all rendered stories', () => {        
+        cy.get('.item:eq(0) span', {log:false})
+          .as('firstRowItem')
+        
+        cy.get('@firstRowItem').within(span => {
+          cy.wrap(span, {log:false}).eq(0, {log:false}).should('have.text', stories.hits[0].title).and('be.visible');
+          cy.wrap(span).contains('a', {log:false}).should('have.attr', 'href', stories.hits[0].url);
+          cy.wrap(span, {log:false}).eq(1, {log:false}).should('have.text', stories.hits[0].author).and('be.visible');
+          cy.wrap(span, {log:false}).eq(2, {log:false}).should('have.text', stories.hits[0].num_comments).and('be.visible');
+          cy.wrap(span, {log:false}).eq(3, {log:false}).should('have.text', stories.hits[0].points).and('be.visible');
+        });
+  
+        cy.get('.item:eq(1) span', {log:false})
+          .as('secondRowItem')
+        
+        cy.get('@secondRowItem').within(span => {
+          cy.wrap(span, {log:false}).eq(0, {log:false}).should('have.text', stories.hits[1].title).and('be.visible');
+          cy.wrap(span).contains('a', {log:false}).should('have.attr', 'href', stories.hits[1].url);
+          cy.wrap(span, {log:false}).eq(1, {log:false}).should('have.text', stories.hits[1].author).and('be.visible');
+          cy.wrap(span, {log:false}).eq(2, {log:false}).should('have.text', stories.hits[1].num_comments).and('be.visible');
+          cy.wrap(span, {log:false}).eq(3, {log:false}).should('have.text', stories.hits[1].points).and('be.visible');
+        });
       });
-    });
+
+      context.only('Order by', () => {
+        it('orders by title', () => {
+          cy.contains('[type="button"]', 'Title')
+            .as('titleHeader')
+            .should('be.visible')
+            .click();
+
+          cy.get('.item span:eq(0)').should('have.text', stories.hits[0].title).and('be.visible');
+
+          cy.get('.item span:eq(0) a').should('have.attr', 'href', stories.hits[0].url).and('be.visible');
+            
+          cy.get('@titleHeader')
+            .click();
+
+          cy.get('.item span:eq(0)').should('have.text', stories.hits[1].title).and('be.visible');
+
+          cy.get('.item span:eq(0) a').should('have.attr', 'href', stories.hits[1].url).and('be.visible');
+        });
+  
+        it('orders by author', () => {
+          cy.contains('[type="button"]', 'Author')
+          .as('authorHeader')
+          .should('be.visible')
+          .click();
+
+        cy.get('.item span:eq(1)').should('have.text', stories.hits[0].author).and('be.visible');
+
+        cy.get('@authorHeader')
+          .click();
+
+        cy.get('.item span:eq(1)').should('have.text', stories.hits[1].author).and('be.visible');
+        });
+  
+        it('orders by comments', () => {
+          cy.contains('[type="button"]', 'Comments')
+          .as('commentsHeader')
+          .should('be.visible')
+          .click();
+
+        cy.get('.item span:eq(2)').should('have.text', stories.hits[1].num_comments).and('be.visible');
+
+        cy.get('@commentsHeader')
+          .click();
+
+        cy.get('.item span:eq(2)').should('have.text', stories.hits[0].num_comments).and('be.visible');
+        });
+  
+        it('orders by points', () => {
+          cy.contains('[type="button"]', 'Points')
+          .as('pointsHeader')
+          .should('be.visible')
+          .click();
+
+        cy.get('.item span:eq(3)').should('have.text', stories.hits[1].points).and('be.visible');
+
+        cy.get('@pointsHeader')
+          .click();
+
+        cy.get('.item span:eq(3)').should('have.text', stories.hits[0].points).and('be.visible');
+        });
+      });
+    });    
   });
   
-  context.skip('Hitting the real API', () => {
+  context('Hitting the real API', () => {
   beforeEach(() => {
     cy.intercept(`api/v1/search?query=React&page=0`)
       .as('getStories');
@@ -108,11 +176,6 @@ describe('Hacker Stories', () => {
   })
 
 context('List of stories', () => {
-    // Since the API is external,
-    // I can't control what it will provide to the frontend,
-    // and so, how can I assert on the data?
-    // This is why this test is being skipped.
-    // TODO: Find a way to test it out.
     it('shows the right data for all rendered stories', () => {})
 
     it('shows 20 stories, then the next 20 after clicking "More"', () => {
@@ -150,7 +213,7 @@ context('List of stories', () => {
     // I can't control what it will provide to the frontend,
     // and so, how can I test ordering?
     // This is why these tests are being skipped.
-    // TODO: Find a way to test them out.
+    // TODO: Find a way to test them out
     context('Order by', () => {
       it('orders by title', () => {})
 
