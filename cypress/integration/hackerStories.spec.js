@@ -58,8 +58,12 @@ describe('Hacker Stories', () => {
         });
       });
 
-      cy.get('.last-searches button')
-        .should('have.length', 5)
+      cy.get('.last-searches')
+        .within(() => {
+          cy.get('button')
+            .should('be.visible')
+            .and('have.length', 5)
+        });
     });
 
     context('List of stories', () =>{
