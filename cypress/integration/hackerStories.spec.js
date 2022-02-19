@@ -2,15 +2,27 @@ const previousWord= 'React'
 const currentWord= 'Testing'
 
 describe('Hacker Stories', () => {
-  context.only('Mocking the API', () => {
+  context('Mocking the API', () => {
     beforeEach(() => {
       cy.intercept(`api/v1/search?query=React&page=0`, {fixture: 'stories'})
         .as('getStories');
 
       cy.intercept(`api/v1/search?query=${currentWord}&page=0`, {fixture: 'stories'})
         .as('searchCurrentWord');
-  
+
+    cy.visit('/');
+
+    });
+
+    it('Shows no story when none is returned', () => {
+      cy.intercept(`api/v1/search?query=React&page=0`, {fixture: 'empty'})
+      .as('emptyStories');
+
       cy.visit('/');
+
+      cy.wait('@emptyStories');
+
+      cy.get('.item').should('not.exist')
     });
     
     it('shows the right amount of records and data for all rendered stories', () => {
@@ -82,7 +94,7 @@ describe('Hacker Stories', () => {
         });
       });
 
-      context.only('Order by', () => {
+      context('Order by', () => {
         it('orders by title', () => {
           cy.contains('[type="button"]', 'Title')
             .as('titleHeader')
@@ -143,7 +155,7 @@ describe('Hacker Stories', () => {
         cy.get('.item span:eq(3)').should('have.text', stories.hits[0].points).and('be.visible');
         });
       });
-    });    
+    });
   });
   
   context('Hitting the real API', () => {
