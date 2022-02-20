@@ -17,5 +17,3 @@
                     .and('have.length', 5)
                 });
         });
-
-Not much refactoring to do in the rest of the code, moving on to Lesson 7.
