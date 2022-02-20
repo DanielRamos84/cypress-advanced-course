@@ -65,5 +65,3 @@
           });
 
 - All we have to do is click on each headers and assert the information is sorted as we expect comparing the text value to its respective property in `stories.hits[index]...`
-
-## Lesson 4 is now complete, now we move on to Lesson 5
