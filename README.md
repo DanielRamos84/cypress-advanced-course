@@ -2,6 +2,8 @@
 
 Udemy test course [Testing Automation with Cypress - Advanced](https://www.udemy.com/course/testing-automation-with-cypress-advanced/)
 
+## Testing is done against [Hacker Stories](https://wlsf82-hacker-stories.web.app/)
+
 ## [Lesson 1](https://github.com/DanielRamos84/cypress-advanced-course/tree/Lesson-1)
 - Different ways to stub network response, formatting options.
 ## [Lesson 2](https://github.com/DanielRamos84/cypress-advanced-course/tree/Lesson-2)
